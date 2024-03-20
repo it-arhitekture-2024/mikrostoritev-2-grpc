@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+package si.um.feri;
+
+service UserService {
+  rpc CreateUser (CreateUserRequest) returns (UserResponse) {}
+  rpc GetUser (GetUserRequest) returns (UserResponse) {}
+  rpc PutUser (PutUserRequest) returns (UserResponse) {}
+  rpc DeleteUser (DeleteUserRequest) returns (DeleteUserResponse) {}
+}
+
+message CreateUserRequest {
+  string name = 1;
+  string surname = 2;
+  int32 age = 3;
+  string type = 4;
+}
+
+message GetUserRequest {
+  string id = 1;
+}
+
+message UserResponse {
+  string id = 1;
+  string name = 2;
+  string surname = 3;
+  int32 age = 4;
+  string type = 5;
+}
+
+message PutUserRequest {
+  string id = 1;
+  string name = 2;
+  string surname = 3;
+  int32 age = 4;
+  string type = 5;
+}
+
+message DeleteUserRequest {
+  string id = 1;
+}
+
+message DeleteUserResponse {
+  string message = 1;
+}
