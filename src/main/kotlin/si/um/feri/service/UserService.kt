@@ -1,3 +1,4 @@
+import org.slf4j.LoggerFactory
 import io.grpc.Status
 import io.grpc.stub.StreamObserver
 import io.quarkus.grpc.GrpcService
@@ -12,6 +13,8 @@ class UserService : UserServiceGrpc.UserServiceImplBase() {
 
     @Inject
     lateinit var userRepository: UserRepository
+
+    private val logger = LoggerFactory.getLogger(UserService::class.java)
 
     override fun createUser(request: User.CreateUserRequest, responseObserver: StreamObserver<User.UserResponse>) {
         val user = si.um.feri.model.User(name = request.name, surname = request.surname, age = request.age, type = request.type)
@@ -28,6 +31,8 @@ class UserService : UserServiceGrpc.UserServiceImplBase() {
 
         responseObserver.onNext(response)
         responseObserver.onCompleted()
+
+        logger.info("Uporabnika je ustvarjen: {}", user)
     }
 
     override fun getUser(request: User.GetUserRequest, responseObserver: StreamObserver<User.UserResponse>) {
@@ -48,10 +53,12 @@ class UserService : UserServiceGrpc.UserServiceImplBase() {
                 responseObserver.onError(Status.NOT_FOUND.asRuntimeException())
             }
         } catch (e: IllegalArgumentException) {
-            responseObserver.onError(Status.INVALID_ARGUMENT.withDescription("Invalid ID format").asRuntimeException())
+            responseObserver.onError(Status.INVALID_ARGUMENT.withDescription("Nepravilna oblika ID").asRuntimeException())
         }
 
         responseObserver.onCompleted()
+
+        logger.info("Najden je uporabnik z ID-jem: {}", request.id)
     }
 
     override fun putUser(request: User.PutUserRequest, responseObserver: StreamObserver<User.UserResponse>) {
@@ -75,11 +82,13 @@ class UserService : UserServiceGrpc.UserServiceImplBase() {
                     .setType(existingUser.type)
                     .build()
                 responseObserver.onNext(response)
+
+                logger.info("Uporabnik je posodobljen: {}", existingUser)
             } else {
                 responseObserver.onError(Status.NOT_FOUND.asRuntimeException())
             }
         } catch (e: IllegalArgumentException) {
-            responseObserver.onError(Status.INVALID_ARGUMENT.withDescription("Invalid ID format").asRuntimeException())
+            responseObserver.onError(Status.INVALID_ARGUMENT.withDescription("Nepravilna oblika ID").asRuntimeException())
         }
 
         responseObserver.onCompleted()
@@ -91,18 +100,19 @@ class UserService : UserServiceGrpc.UserServiceImplBase() {
             val user = userRepository.findById(objectId)
 
             if (user != null) {
-
                 userRepository.delete(user)
 
                 val response = User.DeleteUserResponse.newBuilder()
-                    .setMessage("User deleted successfully")
+                    .setMessage("Uporabnik je uspešno zbrisan.")
                     .build()
                 responseObserver.onNext(response)
+
+                logger.info("Uporabnik je zbrisan: {}", user)
             } else {
                 responseObserver.onError(Status.NOT_FOUND.asRuntimeException())
             }
         } catch (e: IllegalArgumentException) {
-            responseObserver.onError(Status.INVALID_ARGUMENT.withDescription("Invalid ID format").asRuntimeException())
+            responseObserver.onError(Status.INVALID_ARGUMENT.withDescription("Nepravilna oblika ID").asRuntimeException())
         }
 
         responseObserver.onCompleted()
