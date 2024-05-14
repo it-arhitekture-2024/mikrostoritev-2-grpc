@@ -72,7 +72,7 @@ class UserService : UserServiceGrpc.UserServiceImplBase() {
                 existingUser.age = request.age
                 existingUser.type = request.type
 
-                userRepository.persist(existingUser)
+                userRepository.update(existingUser)
 
                 val response = User.UserResponse.newBuilder()
                     .setId(existingUser.id?.toHexString() ?: "unknown")
